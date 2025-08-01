@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>Studence-Spring-Server</artifactId>
+    <version>1.0.0</version>
+
+    <packaging>pom</packaging> 
+    
+       <properties>
+        <java.version>21</java.version>
+        <spring-boot.version>3.5.3</spring-boot.version>
+        <protobuf.version>3.25.1</protobuf.version>
+        <protobuf-plugin.version>0.6.1</protobuf-plugin.version>
+        <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
+		  <maven.compiler.source>21</maven.compiler.source>
+    	<maven.compiler.target>21</maven.compiler.target>
+        <!-- Define where Protobuf files reside relative to child project's base directory -->
+        <protobuf.source.directory>${project.basedir}/src/main/proto</protobuf.source.directory>
+        <!-- Define where generated sources will go within each child project's target directory -->
+        <protobuf.generated.sources.directory>${project.build.directory}/generated-sources/protobuf</protobuf.generated.sources.directory>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Boot BOM for dependency version management -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Protobuf Core -->
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+            <!-- Protobuf Utility (e.g., for JSON conversion) -->
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java-util</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+            <!-- Spring's Protobuf HttpMessageConverter support for JSON/Text format -->
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java-format</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+            
+            
+
+            <!-- Add gRPC dependencies here if relevant for your project -->
+            <!-- <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-protobuf</artifactId>
+                <version>1.60.1</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-stub</artifactId>
+                <version>1.60.1</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-netty-shaded</artifactId>
+                <version>1.60.1</version>
+            </dependency> -->
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- OS Maven Plugin (managed version) -->
+                <plugin>
+                    <groupId>kr.motd.maven</groupId>
+                    <artifactId>os-maven-plugin</artifactId>
+                    <version>${os-maven-plugin.version}</version>
+                </plugin>
+                
+
+                <!-- Protobuf Maven Plugin configuration (managed here) -->
+                <plugin>
+                    <groupId>org.xolstice.maven.plugins</groupId>
+                    <artifactId>protobuf-maven-plugin</artifactId>
+                    <version>${protobuf-plugin.version}</version>
+                    <configuration>
+                        <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+                        <!-- <pluginId>grpc-java</pluginId>
+                        <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.60.1:exe:${os.detected.classifier}</pluginArtifact> -->
+                        <outputDirectory>${protobuf.generated.sources.directory}/java</outputDirectory>
+                        <clearOutputDirectory>false</clearOutputDirectory>
+                        <outputTargets>
+                            <outputTarget>
+                                <generator>java</generator>
+                                <sourceDirectory>${protobuf.source.directory}</sourceDirectory>
+                            </outputTarget>
+                            <!-- <outputTarget>
+                                <generator>grpc-java</generator>
+                                <outputDirectory>${protobuf.generated.sources.directory}/grpc-java</outputDirectory>
+                                <sourceDirectory>${protobuf.source.directory}</sourceDirectory>
+                            </outputTarget> -->
+                        </outputTargets>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>compile</goal>
+                                <!-- <goal>compile-custom</goal> -->
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- Spring Boot Maven Plugin configuration (managed here) -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                    <configuration>
+                        <!-- You can define a default main class here if most apps share it,
+                             or override/specify in individual child POMs. -->
+                        <!-- <mainClass>com.example.yourapp.YourApplication</mainClass> -->
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <!-- os-maven-plugin is explicitly executed here to set the classifier early for all modules -->
+            <plugin>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>detect</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+    </build>
+
+
+    <modules>
+        <module>studence-protobuf</module>
+        <module>studence-data-utils</module>
+        <module>studence-control-flow</module>
+        <module>studence-environment</module>
+        <module>studence-spring-management-app</module>
+    </modules>
+
+</project>
